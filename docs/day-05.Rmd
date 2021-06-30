@@ -49,6 +49,13 @@ Use `dplyr` verbs to  create a data.frame of the **5** counties with the most cu
 (**Hint:** `filter`, `arrange`,  `slice`)
 
 ```{r}
+most_cases = covid  #assign to new dataframe that I can freely edit for this question
+most_cases %>%   #create pipeline
+  filter(cases > 0) %>% #eliminate nulls
+  filter(date == max(date)) %>% #only the latest date with cumulative cases
+  filter(county != "Unknown") %>% #filter out unknown counties
+  arrange(-cases) %>% #sort by cases in decreasing order
+  slice(1:5) #pick top 5
 ```
 
 ## Question 2: 
@@ -58,8 +65,18 @@ Use `dplyr` verbs to create a data.frame of the **5** states with the _most_ cas
 (**Hint:** `filter`, `group_by`, `summarize`, `arrange`, `slice`)
 
 ```{r}
+state_cases = covid %>%   #new datafram for new question & start pipeline
+  filter(cases > 0) %>%  #eliminate nulls
+  filter(date == max(date)) %>% #pick only the final date with cumulative cases
+  group_by(state) %>% #group into state
+  summarize(total_cases = sum(cases, na.rm= FALSE)) %>% # add up all the cases by state into a new table
+  arrange(-total_cases) %>%  #sort in decreasing order
+  slice(1:5) #choose top 5
 
+(state_cases)
 ```
+This correlates with the current 33.6 million total US cases from Google. I had to double check since I made the error of not filtering by max date and ended up with 1 billion cases total and around 300 million in California alone.
+
 
 ## Question 3: 
 
@@ -69,7 +86,15 @@ Use the `dplyr` verbs to report the **5** counties with the _worst_ current deat
 (**Hint:** `filter`, `mutate`, `arrange`, `slice`)
 
 ```{r}
-
+worst_county_deaths = covid %>%  #new dataframe for new question & start pipeline
+  filter(deaths > 0 & cases > 0) %>% #eliminate nulls & zeros
+  filter(date == max(date)) %>% #select cumulative data
+  filter(county != "Unknown") %>% #filter out unknown counties
+  group_by(county) %>% #group counties
+  summarize(percent_death_rate = 100*(sum(deaths, na.rm = FALSE) / sum(cases, na.rm = FALSE))) %>% #death rate by county
+  arrange(-percent_death_rate) %>% #decending death rate
+  slice(1:5)
+(worst_county_deaths)
 ```
 
 ## Question 4: 
@@ -79,8 +104,27 @@ Use the `dplyr` verbs to report the **5** states with the _worst_ current death/
 (**Hint:** `filter`, `group_by`, `summarize`, `mutate`, `arrange`, `slice`)
 
 ```{r}
-```
+worst_state_deaths = covid %>%  #new datafream and pipeline
+  filter(deaths > 0 & cases > 0) %>% #eliminate nulls & zeros
+  filter(date == max(date)) %>% #select cumulative data
+  filter(county != "Unknown") %>% #filter out unknown counties
+  group_by(state) %>% #group state
+  summarize(percent_death_rate = 100*(sum(deaths, na.rm = FALSE) / sum(cases, na.rm = FALSE))) %>% #death rate by state
+  arrange(-percent_death_rate) %>% #decending death rate
+  slice(1:5)
+(worst_state_deaths)
 
+```
+Something is weird with Puerto Rico, I'm going to investigate.
+
+```{r}
+PR_covid = covid
+PR_covid %>% 
+  filter(state == "Puerto Rico") %>% #I only want PR
+  filter(date == max(date)) %>% #only cumulative
+  filter(deaths > 0 & cases > 0) #eliminate nulls & zeros
+```
+Okay, so this explains a lot, mostly about an error in data gathering. In this case I should go back and filter out all counties and states that have unknown in them now that I know that this is the convention of the data set for NA names.
 # END
 
 
