@@ -1,0 +1,134 @@
+---
+title: "Daily Exercise 13"
+author: "Jason Allen"
+subtitle: "07/14/2021"
+output:
+  html_document:
+    code_folding: 'hide'
+    theme: journal
+---
+
+```{r, include=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+#Why does the rmd not knit if I don't add the sf library, but the code runs fine as a chunk?
+library(sf)
+library(mapview)
+library(rmapshaper)
+
+Conus_States <- filter(USAboundaries::us_states(), !(name %in% c("Alaska", "Hawaii", "Puerto Rico")))
+
+
+```  
+
+
+```{r, warning=FALSE, message=FALSE}
+ggplot()+
+  geom_sf(data = Conus_States)
+```  
+ 
+#### Unsimplified geometry has `r npts(Conus_States)` vertices.
+ 
+<br><br>
+  
+----
+
+```{r, warning=FALSE, message=FALSE}
+
+
+simp_ram_1k <- st_simplify(Conus_States, dTolerance = 1000)
+
+ggplot()+
+  geom_sf(data = simp_ram_1k)
+
+
+```  
+  
+#### Plot using st_simplify() with dTollerance = 1000 has `r npts(simp_ram_1k)` vertices.
+
+<br><br>  
+  
+----
+
+
+```{r, warning=FALSE, message=FALSE}
+#need to remove DC since at this level of rendering it is simply a point and it breaks npts
+simp_ram_10k <- filter(st_simplify(Conus_States, dTolerance = 10000), st_is_empty(geometry) != "TRUE")
+
+ggplot()+
+  geom_sf(data = simp_ram_10k)
+
+```  
+  
+#### Plot using st_simplify() with dTollerance = 10000 has `r npts(simp_ram_10k)` vertices.
+
+<br><br>  
+
+----
+
+
+```{r, warning=FALSE, message=FALSE}
+simp_ram_100k <- filter(st_simplify(Conus_States, dTolerance = 100000), st_is_empty(geometry) != "TRUE")
+
+
+
+ggplot()+
+  geom_sf(data = simp_ram_100k)
+
+```  
+  
+#### Plot using st_simplify() with dTollerance = 100000 has `r npts(simp_ram_100k)` vertices.
+
+<br><br>  
+
+----
+
+
+```{r, warning=FALSE, message=FALSE}
+simp_vis_50_per <- filter(ms_simplify(Conus_States, keep = .5), st_is_empty(geometry) != "TRUE")
+
+
+
+ggplot()+
+  geom_sf(data = simp_vis_50_per)
+
+```  
+  
+#### Plot using ms_simplify with keep = .5 has `r npts(simp_vis_50_per)` vertices.
+
+<br><br>  
+
+----
+
+```{r, warning=FALSE, message=FALSE}
+simp_vis_10_per <- filter(ms_simplify(Conus_States, keep = .1), st_is_empty(geometry) != "TRUE")
+
+
+
+ggplot()+
+  geom_sf(data = simp_vis_10_per)
+
+```  
+  
+#### Plot using ms_simplify with keep = .1 has `r npts(simp_vis_10_per)` vertices.
+
+<br><br>  
+
+----
+
+```{r, warning=FALSE, message=FALSE}
+simp_vis_1_per <- filter(ms_simplify(Conus_States, keep = .01), st_is_empty(geometry) != "TRUE")
+
+
+
+ggplot()+
+  geom_sf(data = simp_vis_1_per)
+
+```  
+  
+#### Plot using ms_simplify with keep = .01 has `r npts(simp_vis_1_per)` vertices.
+
+<br><br>
+
+
+
+
