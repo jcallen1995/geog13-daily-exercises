@@ -15,7 +15,8 @@ library(sf)
 library(mapview)
 library(rmapshaper)
 
-Conus_States <- filter(USAboundaries::us_states(), !(name %in% c("Alaska", "Hawaii", "Puerto Rico")))
+Conus_States <- filter(USAboundaries::us_states(), !(name %in% c("Alaska", "Hawaii", "Puerto Rico"))) %>% 
+  st_transform(crs = 5070)
 
 
 ```  
